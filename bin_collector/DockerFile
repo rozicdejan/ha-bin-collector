@@ -1,4 +1,4 @@
-# Stage 1: Build the Go application
+# # Stage 1: Build the Go application
 FROM golang:1.18 as builder
 
 # Set the Current Working Directory inside the container
@@ -6,6 +6,8 @@ WORKDIR /app
 
 # Copy go.mod and go.sum files to the workspace
 COPY go.mod ./
+COPY go.sum ./
+
 # Download dependencies
 RUN go mod download
 
@@ -15,7 +17,7 @@ COPY . .
 # Build the Go application
 RUN go build -o app main.go
 
-# Stage 2: Create a minimal image to run the Go application
+# Stage 2: Create a minimal runtime image
 FROM alpine:latest
 
 # Install required packages
@@ -31,6 +33,14 @@ COPY --from=builder /app/static ./static
 COPY --from=builder /app/config.json .
 COPY --from=builder /app/run.sh .
 
+# Make run.sh executable
+RUN chmod +x run.sh
+
+# Expose port 8081 for the Go application
+EXPOSE 8081
+
+# Run the application using the run.sh script
+CMD ["./run.sh"]
 # Make run.sh executable
 RUN chmod +x run.sh
 
