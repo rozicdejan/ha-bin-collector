@@ -1,0 +1,17 @@
+{
+    "name": "Bin Collector Addon",
+    "version": "1.0",
+    "slug": "bin_collector",
+    "description": "A Go application to fetch waste collection data",
+    "startup": "services",
+    "boot": "auto",
+    "options": {
+      "address": "začret 69"
+    },
+    "schema": {
+      "address": "str"
+    },
+    "ports": {
+      "8081/tcp": 8081
+    }
+  }
