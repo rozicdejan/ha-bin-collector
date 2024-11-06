@@ -2,7 +2,7 @@
     "name": "Bin Collector Addon",
     "version": "1.2",
     "slug": "bin_collector",
-    "description": A Go application to fetch waste collection data,
+    "description": "A Go application to fetch waste collection data",
     "startup": "services",
     "boot": "auto",
     "init": false,
