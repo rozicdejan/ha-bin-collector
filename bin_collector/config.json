@@ -1,24 +1,18 @@
 {
-  "name": "Waste Bin Collection",
-  "version": "1.4",
-  "slug": "bin_waste_collection",
-  "description": "A Home Assistant add-on for waste collection notifications...",
-  "startup": "application",
+  "name": "Bin Collector Addon",
+  "version": "1.5",
+  "slug": "bin_collector",
+  "description": "A Go application to fetch waste collection data",
+  "startup": "services",
   "boot": "auto",
-  "host_network": true,
-  "hassio_api": true,
-  "homeassistant_api": true,
-  "hassio_role": "default",
-  "arch": [
-    "aarch64",
-    "amd64",
-    "armv7",
-    "i386"
-  ],
+  "init": false,
   "options": {
-    "address": "ZAČRET 69"
+    "address": "začret 69"
   },
   "schema": {
     "address": "str"
+  },
+  "ports": {
+    "8081/tcp": 8081
   }
 }
