@@ -1,5 +1,5 @@
 name: "Bin Collector Addon - Simbio"
-version: "2.3"
+version: "2.4"
 slug: "bin_collector_simbio"
 description: "A Go application to fetch waste collection data"
 startup: "services"  # Starts after basic services are ready
