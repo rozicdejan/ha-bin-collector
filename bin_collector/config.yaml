@@ -1,5 +1,5 @@
 name: "Bin Collector Addon - Simbio"
-version: "3.6"
+version: "3.7"
 slug: "bin_collector_simbio"
 description: "A Go application to fetch waste collection data"
 arch:
@@ -8,7 +8,7 @@ arch:
   - aarch64
 startup: "application"
 ports:
-  8081/tcp: 8081
+  8081/tcp: "8081"
 options:
   address: "začret 69"
 schema:
