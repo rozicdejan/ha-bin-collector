@@ -2,23 +2,25 @@ name: "Bin Collector Addon - Simbio"
 version: "2.3"
 slug: "bin_collector_simbio"
 description: "A Go application to fetch waste collection data"
-startup: "services"
-homeassistant: true
-host_network: true
+startup: "services"  # Starts after basic services are ready
+homeassistant: true  # Indicates the add-on interacts with Home Assistant
+host_network: true   # Allows the add-on to use the host's network stack
 arch:
   - armhf
   - armv7
   - aarch64
   - amd64
   - i386
-boot: "auto"
-init: false
+boot: "auto"         # Starts automatically with the system
+init: false          # Set to true if initialization scripts are needed
 options:
-  address: "začret 69"
+  address:
+    description: "The address for waste collection data"
+    type: string
+    default: "začret 69"
 schema:
   address:
     type: string
     required: true
-    default: "začret 69"
 ports:
   8081/tcp: 8081
