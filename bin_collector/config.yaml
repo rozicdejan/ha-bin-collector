@@ -6,11 +6,5 @@ arch:
   - amd64
   - armv7
   - aarch64
-init: false
-options:
-  address: "začret 69"
-schema:
-  address:
-    type: "str"
 ports:
   8081/tcp: "8081"
