@@ -15,12 +15,8 @@ boot: "auto"         # Starts automatically with the system
 init: false          # Set to true if initialization scripts are needed
 options:
   address: "začret 69"
-  homeassistant_url: "http://supervisor"
 schema:
   address:
-    type: string
-    required: true
-  homeassistant_url:
     type: string
     required: true
 ports:
