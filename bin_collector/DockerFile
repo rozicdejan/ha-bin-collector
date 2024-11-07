@@ -26,8 +26,5 @@ RUN go build -o  bin-waste-collection main.go
 COPY run.sh /app/run.sh
 RUN chmod +x /app/run.sh
 
-# Expose port 8081 for the web application
-EXPOSE 8081
-
 # Start the application using the run.sh script
 ENTRYPOINT ["/app/run.sh"]
