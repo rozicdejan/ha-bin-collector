@@ -3,7 +3,7 @@
   "version": "1.5",
   "slug": "bin_collector",
   "description": "A Go application to fetch waste collection data",
-  "startup": "services",
+  "startup": "application",
   "boot": "auto",
   "init": false,
   "options": {
