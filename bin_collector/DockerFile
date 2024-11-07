@@ -1,5 +1,5 @@
 # Start from a base Go image
-FROM golang:1.18-alpine
+FROM golang:1.18-alpine AS build
 
 # Install necessary dependencies
 RUN apk add --no-cache bash jq ca-certificates
@@ -8,21 +8,25 @@ RUN apk add --no-cache bash jq ca-certificates
 WORKDIR /app
 
 # Copy Go module files and download dependencies
-COPY go.mod ./
+COPY go.mod go.sum ./
 RUN go mod download
 
 # Copy the Go source code and build it
 COPY main.go ./
-RUN go build -o waste-collection main.go
+RUN go build -o bin-waste-collection main.go
 
-# Copy additional files needed for runtime
-COPY template.html /app/template.html  # Assuming this file exists
-COPY static /app/static  # Assuming this folder exists
-COPY config.json /app/config.json  # Assuming this file exists
-COPY run.sh /app/run.sh
+# Use a smaller base image for the runtime
+FROM alpine:3.16
+
+# Copy the built binary and necessary files
+COPY --from=build /app/bin-waste-collection /app/bin-waste-collection
+COPY --from=build /app/template.html /app/template.html
+COPY --from=build /app/static /app/static
+COPY --from=build /app/config.json /app/config.json
+COPY --from=build /app/run.sh /app/run.sh
 
 # Make the run.sh file executable
 RUN chmod +x /app/run.sh
 
 # Use the run.sh script as the entry point
-CMD ["/app/run.sh"]
+ENTRYPOINT ["/app/run.sh"]
