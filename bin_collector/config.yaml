@@ -14,12 +14,13 @@ arch:
 boot: "auto"         # Starts automatically with the system
 init: false          # Set to true if initialization scripts are needed
 options:
-  address:
-    description: "The address for waste collection data"
-    type: string
-    default: "začret 69"
+  address: "začret 69"
+  homeassistant_url: "http://supervisor"
 schema:
   address:
+    type: string
+    required: true
+  homeassistant_url:
     type: string
     required: true
 ports:
