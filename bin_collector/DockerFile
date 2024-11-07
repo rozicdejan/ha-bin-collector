@@ -1,32 +1,45 @@
-# Start from a base Go image
-FROM golang:1.18-alpine AS build
+# Use the official Golang image to build the application
+FROM golang:1.20 as builder
 
-# Install necessary dependencies
-RUN apk add --no-cache bash jq ca-certificates
-
-# Set the working directory
+# Set the Current Working Directory
 WORKDIR /app
 
-# Copy Go module files and download dependencies
-COPY go.mod go.sum ./
+# Copy go.mod and go.sum files
+COPY go.mod ./
+
+# Download dependencies
 RUN go mod download
 
-# Copy the Go source code and build it
+# Copy the source code
 COPY main.go ./
-RUN go build -o bin-waste-collection main.go
+COPY template.html ./
+COPY static ./static/
+COPY config.yaml ./
 
-# Use a smaller base image for the runtime
-FROM alpine:3.16
+# Build the Go app
+RUN go build -o main .
 
-# Copy the built binary and necessary files
-COPY --from=build /app/bin-waste-collection /app/bin-waste-collection
-COPY --from=build /app/template.html /app/template.html
-COPY --from=build /app/static /app/static
-COPY --from=build /app/config.json /app/config.json
-COPY --from=build /app/run.sh /app/run.sh
+# Use a minimal base image for running the built application
+FROM alpine:latest
 
-# Make the run.sh file executable
-RUN chmod +x /app/run.sh
+# Set environment variables for timezone if needed
+ENV TZ="UTC"
 
-# Use the run.sh script as the entry point
-ENTRYPOINT ["/app/run.sh"]
+# Set the working directory for the application
+WORKDIR /app
+
+# Copy the compiled binary and other necessary files from the builder
+COPY --from=builder /app/main .
+COPY --from=builder /app/template.html ./
+COPY --from=builder /app/static ./static/
+COPY --from=builder /app/config.yaml ./
+
+# Copy the run script
+COPY run.sh ./
+RUN chmod +x run.sh
+
+# Expose a port if your application serves on a specific port (e.g., 8080)
+EXPOSE 8080
+
+# Start the application using the run.sh script
+ENTRYPOINT ["./run.sh"]
