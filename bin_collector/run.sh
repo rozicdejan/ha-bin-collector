@@ -1,12 +1,8 @@
-#!/bin/sh
+#!/usr/bin/env bash
+set -e
 
-# Check if an ADDRESS environment variable is set, if not, use a default value
-if [ -z "$ADDRESS" ]; then
-  export ADDRESS="začret 69"
-  echo "No ADDRESS environment variable set, using default: $ADDRESS"
-else
-  echo "Using ADDRESS environment variable: $ADDRESS"
-fi
+# Load configuration from options.json
+ADDRESS=$(jq --raw-output '.address' /data/options.json)
 
-# Start the Go application
-./main
+# Run the Go application with the address argument
+/app/bin-waste-collection --address "$ADDRESS"

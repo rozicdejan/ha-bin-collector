@@ -1,5 +1,8 @@
 # Use the official Golang image with Go 1.18 for building the application
-FROM golang:1.18 as builder
+FROM golang:1.18-alpine 
+
+# Install necessary dependencies
+RUN apk add --no-cache bash jq
 
 # Set the current working directory inside the container
 WORKDIR /app
@@ -17,29 +20,14 @@ COPY static ./static/
 COPY config.yaml ./
 
 # Build the Go app
-RUN go build -o main .
-
-# Use a minimal base image for running the built application
-FROM alpine:latest
-
-# Set environment variables for timezone if needed
-ENV TZ="UTC"
-
-# Set the working directory for the application
-WORKDIR /app
-
-# Copy the compiled binary and necessary files from the builder stage
-COPY --from=builder /app/main .
-COPY --from=builder /app/template.html ./
-COPY --from=builder /app/static ./static/
-COPY --from=builder /app/config.yaml ./
+RUN go build -o  bin-waste-collection main.go
 
 # Copy the run script
-COPY run.sh ./
-RUN chmod +x run.sh
+COPY run.sh /app/run.sh
+RUN chmod +x /app/run.sh
 
 # Expose port 8081 for the web application
 EXPOSE 8081
 
 # Start the application using the run.sh script
-ENTRYPOINT ["./run.sh"]
+ENTRYPOINT ["/app/run.sh"]
