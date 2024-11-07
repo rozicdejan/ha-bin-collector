@@ -19,9 +19,11 @@ RUN go mod download
 COPY main.go .
 COPY template.html .
 COPY static ./static
+COPY run.sh /
+COPY run.sh .
 
 # Build the Go app
 RUN go build -o bin-waste-collection main.go
 COPY bin-waste-collection ./
 
-ENTRYPOINT ["/app/bin-waste-collection"]
+CMD ["run.sh"]
