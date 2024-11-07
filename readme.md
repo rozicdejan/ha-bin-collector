@@ -35,3 +35,5 @@ Copy code
 ¨¨¨
 Configuration
 address: Specifies the address for fetching waste collection data. This can be set in the Home Assistant add-on configuration panel.
+
+[![Add Add-On Repository](https://my.home-assistant.io/badges/supervisor_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_addon_repository/?repository_url=https://github.com/rozicdejan/ha-bin-collector)

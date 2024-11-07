@@ -10,6 +10,7 @@ arch:
   - armv7
   - aarch64
 boot: auto
+
 init: false
 
 options:
@@ -20,6 +21,6 @@ schema:
     type: str
     description: The address to use for fetching waste collection data
     default: začret 69
-
+    
 ports:
   8081/tcp: 8081
