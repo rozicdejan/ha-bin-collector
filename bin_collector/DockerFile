@@ -14,13 +14,15 @@ COPY go.mod ./
 RUN go mod download
 
 # Copy the source code
-COPY main.go ./
-COPY template.html ./
-COPY static ./static/
-COPY config.yaml ./
+COPY main.go .
+COPY template.html .
+COPY static ./static
+COPY config.yaml .
 
 # Build the Go app
 RUN go build -o  bin-waste-collection main.go
+# Build the Go app
+RUN go build -o  /app/bin-waste-collection main.go
 
 # Copy the run script
 COPY run.sh /app/run.sh
