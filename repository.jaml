@@ -1,0 +1,4 @@
+# https://developers.home-assistant.io/docs/add-ons/repository#repository-configuration
+name: Home Assistant add-on for bin Collector Simbio
+url: 'https://github.com/rozicdejan/ha-bin-collector'
+maintainer: Dejan Rožič <rozic.dejan@gmail.com>
