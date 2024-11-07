@@ -1,5 +1,5 @@
 name: "Bin Collector Addon - Simbio"
-version: "3.3"
+version: "3.5"
 slug: "bin_collector_simbio"
 description: "A Go application to fetch waste collection data"
 arch:
