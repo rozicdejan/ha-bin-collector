@@ -1,5 +1,7 @@
+ARG BUILD_FROM
+FROM $BUILD_FROM
 # Use the official Golang image with Go 1.18 for building the application
-FROM golang:1.18-alpine 
+#FROM golang:1.18-alpine 
 
 # Install necessary dependencies
 RUN apk add --no-cache bash jq
