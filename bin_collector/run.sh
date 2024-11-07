@@ -1,19 +1,12 @@
-#!/bin/bash
+#!/bin/sh
 
-# Load configuration from options.json
-if [ -f "/data/options.json" ]; then
-    ADDRESS=$(jq --raw-output '.address' /data/options.json)
-    if [ $? -eq 0 ]; then
-        # Export environment variable for the Go application
-        export ADDRESS
-        
-        # Run the Go application
-        ./bin-waste-collection
-    else
-        echo "Error: Failed to extract address from options.json" >&2
-        exit 1
-    fi
+# Check if an ADDRESS environment variable is set, if not, use a default value
+if [ -z "$ADDRESS" ]; then
+  export ADDRESS="začret 69"
+  echo "No ADDRESS environment variable set, using default: $ADDRESS"
 else
-    echo "Error: options.json file not found" >&2
-    exit 1
+  echo "Using ADDRESS environment variable: $ADDRESS"
 fi
+
+# Start the Go application
+./main

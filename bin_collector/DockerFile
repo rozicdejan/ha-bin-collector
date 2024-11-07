@@ -1,7 +1,7 @@
 # Use the official Golang image to build the application
 FROM golang:1.20 as builder
 
-# Set the Current Working Directory
+# Set the current working directory inside the container
 WORKDIR /app
 
 # Copy go.mod and go.sum files
@@ -28,7 +28,7 @@ ENV TZ="UTC"
 # Set the working directory for the application
 WORKDIR /app
 
-# Copy the compiled binary and other necessary files from the builder
+# Copy the compiled binary and necessary files from the builder stage
 COPY --from=builder /app/main .
 COPY --from=builder /app/template.html ./
 COPY --from=builder /app/static ./static/
@@ -38,8 +38,8 @@ COPY --from=builder /app/config.yaml ./
 COPY run.sh ./
 RUN chmod +x run.sh
 
-# Expose a port if your application serves on a specific port (e.g., 8080)
-EXPOSE 8080
+# Expose port 8081 for the web application
+EXPOSE 8081
 
 # Start the application using the run.sh script
 ENTRYPOINT ["./run.sh"]
