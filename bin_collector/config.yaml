@@ -8,7 +8,7 @@ arch:
   - aarch64
 startup: "application"
 ports:
-  8081/tcp: "8081"
+  8081/tcp: 8081
 options:
   address: "začret 69"
 schema:
