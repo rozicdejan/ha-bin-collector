@@ -1,6 +1,6 @@
 {
-  "name": "Bin Collector Addon",
-  "version": "1.5",
+  "name": "Bin Collector Addon - Simbio",
+  "version": "1.6",
   "slug": "bin_collector",
   "description": "A Go application to fetch waste collection data",
   "startup": "application",
