@@ -3,6 +3,9 @@
 # Use the official Golang image with Go 1.18 for building the application
 FROM golang:1.18-alpine AS builder
 
+# Install necessary dependencies
+RUN apk add --no-cache bash jq
+
 # Set the current working directory inside the container
 WORKDIR /app
 
@@ -19,5 +22,6 @@ COPY static ./static
 
 # Build the Go app
 RUN go build -o bin-waste-collection main.go
+
 
 ENTRYPOINT ["/app/bin-waste-collection"]
