@@ -1,43 +1,28 @@
-# Stage 1: Build the Go application
-FROM golang:1.18 as builder
+# Start from a base Go image
+FROM golang:1.18-alpine
 
-# Set the Current Working Directory inside the container
-WORKDIR /app
-
-# Copy go.mod and go.sum files to the workspace
-COPY go.mod ./
-COPY go.sum ./
-
-# Download dependencies
-RUN go mod download
-
-# Copy the entire source code
-COPY . .
-
-# Build the Go application
-RUN go build -o app main.go
-
-# Stage 2: Create a minimal runtime image
-FROM alpine:3.18
-
-# Install required packages
-RUN apk --no-cache add ca-certificates jq
+# Install necessary dependencies
+RUN apk add --no-cache bash jq ca-certificates
 
 # Set the working directory
-WORKDIR /root/
+WORKDIR /app
 
-# Copy the compiled Go binary and other required files from the builder stage
-COPY --from=builder /app/app .
-COPY --from=builder /app/template.html .  # Assuming template.html is present
-COPY --from=builder /app/static ./static  # Assuming static folder is present
-COPY --from=builder /app/config.json .    # Assuming config.json is required
-COPY --from=builder /app/run.sh .         # Assuming run.sh is present
+# Copy Go module files and download dependencies
+COPY go.mod ./
+RUN go mod download
 
-# Make the Go application and run.sh executable (if applicable)
-RUN chmod +x app run.sh
+# Copy the Go source code and build it
+COPY main.go ./
+RUN go build -o waste-collection main.go
 
-# Expose port 8081 for the Go application
-EXPOSE 8081
+# Copy additional files needed for runtime
+COPY template.html /app/template.html  # Assuming this file exists
+COPY static /app/static  # Assuming this folder exists
+COPY config.json /app/config.json  # Assuming this file exists
+COPY run.sh /app/run.sh
 
-# Run the application using the run.sh script
-CMD ["./run.sh"]
+# Make the run.sh file executable
+RUN chmod +x /app/run.sh
+
+# Use the run.sh script as the entry point
+CMD ["/app/run.sh"]
