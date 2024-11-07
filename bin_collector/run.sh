@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Load configuration from options.json
-ADDRESS=$(jq -r '.address' /data/options.json)
+ADDRESS=$(jq --raw-output '.address' /data/options.json)
 
 # Export environment variable for the Go application
 export ADDRESS
