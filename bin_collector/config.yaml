@@ -1,0 +1,58 @@
+name: Bin Collector Addon - Simbio
+version: '2.8'
+slug: bin-collector-simbio
+description: A Go application to fetch waste collection data
+image: ghcr.io/rozicdejan/ha-bin-collector:2.8
+startup: application
+homeassistant: true
+host_network: true
+arch:
+  - amd64
+  - armv7
+  - aarch64
+boot: auto
+init: false
+
+options:
+  address: začret 69
+
+schema:
+  address:
+    type: str
+    description: The address to use for fetching waste collection data
+    default: začret 69
+
+ports:
+  8081/tcp: 8081
+
+mounts:
+  - source: /data
+    target: /data
+    type: bind
+
+environment:
+  - name: ADDRESS
+    default: začret 69
+    description: The address to use for fetching waste collection data
+
+  - name: TEMPLATE_PATH
+    default: /data/template.html
+    description: The path to the HTML template file
+
+  - name: STATIC_PATH
+    default: /data/static
+    description: The path to the static assets directory
+
+  - name: UPDATE_INTERVAL
+    default: "15"
+    description: The interval in minutes for updating the waste collection data
+
+privileged: true
+
+auto_update:
+  github:
+    owner: rozicdejan
+    repo: ha-bin-collector
+    tag_pattern: "*"
+
+schema_version: 2.1
