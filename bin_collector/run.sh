@@ -1,5 +1,5 @@
 #!/bin/ash
-set -e
+#set -e
 
 # Load configuration from config.json
 ADDRESS=$(jq --raw-output '.address' /data/options.json)
