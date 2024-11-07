@@ -1,4 +1,4 @@
-# # Stage 1: Build the Go application
+# Stage 1: Build the Go application
 FROM golang:1.18 as builder
 
 # Set the Current Working Directory inside the container
@@ -33,14 +33,6 @@ COPY --from=builder /app/static ./static
 COPY --from=builder /app/config.json .
 COPY --from=builder /app/run.sh .
 
-# Make run.sh executable
-RUN chmod +x run.sh
-
-# Expose port 8081 for the Go application
-EXPOSE 8081
-
-# Run the application using the run.sh script
-CMD ["./run.sh"]
 # Make run.sh executable
 RUN chmod +x run.sh
 
