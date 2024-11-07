@@ -3,6 +3,8 @@ version: "2.1"
 slug: "bin_collector_simbio"
 description: "A Go application to fetch waste collection data"
 startup: "application"
+homeassistant: true
+host_network: true
 arch:
   - armhf
   - armv7
