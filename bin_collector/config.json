@@ -1,6 +1,6 @@
 {
   "name": "Bin Collector Addon - Simbio",
-  "version": "4.2",
+  "version": "4.4",
   "slug": "bin_collector_simbio",
   "description": "A Go application to fetch waste collection data",
   "arch": ["amd64", "armv7", "aarch64", "i386"],
