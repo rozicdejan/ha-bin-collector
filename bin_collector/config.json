@@ -1,18 +1,13 @@
-{
-  "name": "Bin Collector Addon - Simbio",
-  "version": "1.6",
-  "slug": "bin_collector",
-  "description": "A Go application to fetch waste collection data",
-  "startup": "application",
-  "boot": "auto",
-  "init": false,
-  "options": {
-    "address": "začret 69"
-  },
-  "schema": {
-    "address": "str"
-  },
-  "ports": {
-    "8081/tcp": 8081
-  }
-}
+name: "Bin Collector Addon - Simbio"
+version: "1.6"
+slug: "bin_collector"
+description: "A Go application to fetch waste collection data"
+startup: "application"
+boot: "auto"
+init: false
+options:
+  address: "začret 69"
+schema:
+  address: str
+ports:
+  8081/tcp: 8081
