@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
-	"os" // Import for reading environment variables
+	"os"
 	"sync"
 	"time"
 )
@@ -18,13 +18,18 @@ const (
 	retryCount     = 3
 	retryDelay     = 5 * time.Second
 	requestTimeout = 10 * time.Second
+	updateInterval = 15 * time.Minute
 )
 
 var (
-	address   string // The address input from Home Assistant environment
-	wasteData = TemplateData{}
-	fullData  = FullData{}
-	mutex     = &sync.Mutex{}
+	address string
+	logger  *log.Logger
+	// Use atomic operations or mutex consistently
+	wasteData = struct {
+		sync.RWMutex
+		template TemplateData
+		full     FullData
+	}{}
 )
 
 // WasteSchedule represents the structure of a single JSON object in the response array
@@ -62,41 +67,42 @@ type FullData struct {
 }
 
 func init() {
-	// Get the address from the environment variable, defaulting to "začret 69" if not set
+	// Initialize logger
+	logger = log.New(os.Stdout, "[BIN-COLLECTOR] ", log.LstdFlags)
+
+	// Get the address from the environment variable
 	address = os.Getenv("ADDRESS")
 	if address == "" {
 		address = "začret 69"
+		logger.Println("No ADDRESS environment variable set, using default:", address)
 	}
 }
 
-// fetchDataWithRetry makes an HTTP POST request to fetch the waste collection data with retry logic
-func fetchDataWithRetry() {
-	var err error
+func fetchDataWithRetry() error {
+	var lastErr error
 	for i := 0; i < retryCount; i++ {
-		err = fetchData()
-		if err == nil {
-			return // Success
+		if err := fetchData(); err == nil {
+			return nil
+		} else {
+			lastErr = err
+			logger.Printf("Attempt %d failed: %v", i+1, err)
+			time.Sleep(retryDelay)
 		}
-		log.Printf("Attempt %d failed: %v", i+1, err)
-		time.Sleep(retryDelay)
 	}
-	log.Println("All retry attempts failed. Serving with old data or fallback response.")
+	return fmt.Errorf("all retry attempts failed: %v", lastErr)
 }
 
-// fetchData makes an HTTP POST request to fetch the waste collection data
 func fetchData() error {
-	// Create the POST request payload
 	payload := []byte(fmt.Sprintf("action=simbioOdvozOdpadkov&query=%s", address))
 
-	// Create and configure the POST request
 	client := &http.Client{Timeout: requestTimeout}
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(payload))
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
 	}
+
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	// Send the request
 	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("failed to perform request: %w", err)
@@ -107,13 +113,11 @@ func fetchData() error {
 		return fmt.Errorf("received non-OK HTTP status: %s", resp.Status)
 	}
 
-	// Read and parse the response
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("failed to read response: %w", err)
 	}
 
-	// Parse the response as an array of WasteSchedule objects
 	var schedules []WasteSchedule
 	if err := json.Unmarshal(body, &schedules); err != nil {
 		return fmt.Errorf("failed to parse JSON response: %w", err)
@@ -123,10 +127,11 @@ func fetchData() error {
 		return fmt.Errorf("no data received in the response")
 	}
 
-	// Update the shared data with the first item in the array (adjust as needed)
 	firstSchedule := schedules[0]
-	mutex.Lock()
-	wasteData = TemplateData{
+
+	// Update the shared data with proper locking
+	wasteData.Lock()
+	wasteData.template = TemplateData{
 		MKOName: "Mešani komunalni odpadki",
 		MKODate: firstSchedule.NextMKO,
 		EmbName: "Embalaža",
@@ -134,7 +139,7 @@ func fetchData() error {
 		BioName: "Biološki odpadki",
 		BioDate: firstSchedule.NextBio,
 	}
-	fullData = FullData{
+	wasteData.full = FullData{
 		Name:    firstSchedule.Name,
 		Query:   firstSchedule.Query,
 		City:    firstSchedule.City,
@@ -145,57 +150,71 @@ func fetchData() error {
 		BioName: "Biološki odpadki",
 		BioDate: firstSchedule.NextBio,
 	}
-	mutex.Unlock()
+	wasteData.Unlock()
+
 	return nil
 }
 
-// Serve dynamic HTML
 func dataHandler(w http.ResponseWriter, r *http.Request) {
-	mutex.Lock()
-	defer mutex.Unlock()
-
 	tmpl, err := template.ParseFiles("template.html")
 	if err != nil {
 		http.Error(w, "Failed to load template", http.StatusInternalServerError)
-		log.Printf("Error loading template: %v", err)
+		logger.Printf("Error loading template: %v", err)
 		return
 	}
-	if err := tmpl.Execute(w, wasteData); err != nil {
+
+	wasteData.RLock()
+	err = tmpl.Execute(w, wasteData.template)
+	wasteData.RUnlock()
+
+	if err != nil {
 		http.Error(w, "Failed to render template", http.StatusInternalServerError)
-		log.Printf("Error rendering template: %v", err)
+		logger.Printf("Error rendering template: %v", err)
 	}
 }
 
-// Serve JSON data via API
 func apiDataHandler(w http.ResponseWriter, r *http.Request) {
-	mutex.Lock()
-	defer mutex.Unlock()
-
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(fullData); err != nil {
+
+	wasteData.RLock()
+	err := json.NewEncoder(w).Encode(wasteData.full)
+	wasteData.RUnlock()
+
+	if err != nil {
 		http.Error(w, "Failed to encode data to JSON", http.StatusInternalServerError)
-		log.Printf("Error encoding JSON response: %v", err)
+		logger.Printf("Error encoding JSON response: %v", err)
 	}
 }
 
-// Updates data every 15 minutes with retry logic
 func dataUpdater() {
 	for {
-		fetchDataWithRetry()
-		time.Sleep(15 * time.Minute)
+		if err := fetchDataWithRetry(); err != nil {
+			logger.Printf("Failed to update data: %v", err)
+		}
+		time.Sleep(updateInterval)
 	}
 }
 
 func main() {
-	// Serve static files (e.g., for images or other assets if needed)
+	logger.Println("Starting bin collector service...")
+
+	// Initial data fetch
+	if err := fetchDataWithRetry(); err != nil {
+		logger.Printf("Initial data fetch failed: %v", err)
+	}
+
+	// Setup routes
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
-
-	go dataUpdater() // Runs the data updater in the background
-
 	http.HandleFunc("/", dataHandler)
-	http.HandleFunc("/api/data", apiDataHandler) // New API endpoint
+	http.HandleFunc("/api/data", apiDataHandler)
 
-	// Start the server
-	fmt.Println("Server running on http://0.0.0.0:8081")
-	log.Fatal(http.ListenAndServe("0.0.0.0:8081", nil))
+	// Start background updater
+	go dataUpdater()
+
+	// Start server
+	addr := "0.0.0.0:8081"
+	logger.Printf("Server running on http://%s", addr)
+	if err := http.ListenAndServe(addr, nil); err != nil {
+		logger.Fatal("Server failed to start:", err)
+	}
 }
