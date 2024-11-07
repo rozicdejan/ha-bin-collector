@@ -1,8 +1,8 @@
-#!/usr/bin/with-contenv bashio
+#!/bin/ash
 set -e
 
-# Load configuration from options.json
-ADDRESS=$(jq --raw-output '.address' /data/options.json)
+# Load configuration from config.json
+ADDRESS=$(jq --raw-output '.address' /data/config.json)
 
 # Run the Go application with the address argument
 /app/bin-waste-collection --address "$ADDRESS"
