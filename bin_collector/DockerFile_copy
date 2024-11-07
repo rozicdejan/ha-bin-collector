@@ -23,10 +23,5 @@ COPY static ./static
 # Build the Go app
 RUN go build -o bin-waste-collection main.go
 
-# Copy the run.sh file and make it executable
-COPY run.sh /app/run.sh
-RUN chmod +x /app/run.sh
 
-
-# Use the run.sh script as the entry point
-CMD ["/app/run.sh"]
+ENTRYPOINT ["/app/bin-waste-collection"]
