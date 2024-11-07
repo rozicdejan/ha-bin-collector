@@ -18,7 +18,7 @@ COPY . .
 RUN go build -o app main.go
 
 # Stage 2: Create a minimal runtime image
-FROM alpine:latest
+FROM alpine:3.18
 
 # Install required packages
 RUN apk --no-cache add ca-certificates jq
@@ -39,5 +39,5 @@ RUN chmod +x run.sh
 # Expose port 8081 for the Go application
 EXPOSE 8081
 
-# Run the application using the run.sh script
-CMD ["./run.sh"]
+# Use ENTRYPOINT instead of CMD if you want to ensure ./run.sh is always executed
+ENTRYPOINT ["./run.sh"]
